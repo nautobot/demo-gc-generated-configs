@@ -1,0 +1,23 @@
+---
+name: "Nightly Reset"
+on:  # yamllint disable-line rule:truthy
+  schedule:
+    - cron: "0 6 * * *"
+  workflow_dispatch:  # yamllint disable-line rule:empty-values
+jobs:
+  reset_repo:
+    runs-on: "ubuntu-20.04"
+    steps:
+      - name: "Check out repository code"
+        uses: "actions/checkout@v2"
+        with:
+          persist-credentials: false
+      - name: "Commit Changes"
+        run: |
+          git config --global user.name 'GitHub CI'
+          git config --global user.email 'networktocode@users.noreply.github.com'
+          git fetch
+          git checkout main
+          git reset --hard baseline
+          git remote set-url origin https://${{ secrets.BOT_GITHUB_USERNAME }}:${{ secrets.BOT_GITHUB_TOKEN }}@github.com/${{ github.repository }}
+          git push --force
